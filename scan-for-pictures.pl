@@ -21,37 +21,43 @@ while (<>) {
   $lno++;
   $imno=1;
   $line=$_;
-  while ($line =~ m#([a-z]+=["']http:[^"']+)(.*)#) {
+  while ($line =~ m#([a-z]+=["']https?:[^"']+)(.*)#) {
     $url=$1; $next=$2;
     $preview=substr($next,0,40);
-#    print STDERR "$` [$url] [$preview...\n";
+#    print STDERR "0_0 $` [$url] [$preview...\n";
 
-    if ($url=~ m=(http://[a-z0-9.]+blogspot.com/[-_][0-9a-zA-Z/_-]+)/s([0-9]+)(\-?h?/)([^".]+.[a-z]+)(.*)=) {
+    if ($url=~ m=(https?://[a-z0-9.]+blogspot.com/[-_][0-9a-zA-Z/_-]+)/s([0-9]+)(\-?h?/)([^".]+.[a-z]+)(.*)=) {
       -r "$lno-$imno-$4" or 
-	print "{local, $2px, $lno} '$1/s$2/$4' --output-document=\'$lno-$imno-$4\'\n";
+	print "{local, $2px, $lno} '$1/s$2/$4' --output-document=\"$lno-$imno-$4\"\n";
       $imno++; $line=$next; next;
     }
 
-    if ($url=~ m=(http://photos[0-9]+.blogger.com/[^".]+)/([^"/]+)(.*)=) {
-      print STDERR "[$1//$2]\n";
+    if ($url=~ m=(https?://photos[0-9]+.blogger.com/[^".]+)/([^"/]+)(.*)=) { 
       -r "$lno-$imno-$2" or 
 	print "{bl0gger, $lno} '$1/$2' --output-document=\"$lno-$imno-$2\"\n";
       $imno++; $line=$next; next;
     }
 
+    if ($url=~ m=(https?://lh..googleusercontent.com/[^".]+)/([^"/]+)(.*)=) {
+	print STDERR "[$1//$2]\n";
+	-r "$lno-$imno-$2" or 
+	    print "{g00gle, $lno} '$1/$2' --output-document=\"$lno-$imno-$2\"\n";
+	$imno++; $line=$next; next;
+    }
+    
     # 1600-h are html version (setting title) of 1600 (that is, non-resized) pictures.
-    if ($url=~ m=(http://[a-z0-9.]+blogger.com/[-_][0-9a-zA-Z/_-]+)/s([0-9]+)(\-?h?/)([^".]+.[a-z]+)(.*)=) {
+    if ($url=~ m=(https?://[a-z0-9.]+blogger.com/[-_][0-9a-zA-Z/_-]+)/s([0-9]+)(\-?h?/)([^".]+.[a-z]+)(.*)=) {
       -r "$lno-$imno-$4" or 
 	print "{blogger, $2px, $lno} $1/s$2/$4 --output-document=\"$lno-$imno-$4\"\n";
       $imno++; $line=$next; next;
     }
-    if ($url=~ m=(http://[a-z0-9.]+.flickr.com/[^"]+)/([^"/]+)(.*)=) {
+    if ($url=~ m=(https?://[a-z0-9.]+.flickr.com/[^"]+)/([^"/]+)(.*)=) {
       -r "$lno-$imno-$2" or 
 	print "{flick, $lno} $1/$2 --output-document=\"$lno-$imno-$2\"\n";
       $imno++; $line=$next; next;
     }
     # this one will catch all pictures, but not hlinks.
-    if ($url=~ m#src="(http://[^"]+.[a-z]+)/([^"/]+)(.*)"#) {
+    if ($url=~ m#src="(https?://[^"]+.[a-z]+)/([^"/]+)(.*)"#) {
       -r "$lno-$imno-$2" or 
 	print "{external, $lno} '$1/$2' --output-document=\"$lno-$imno-$2\"\n";
       $imno++; $line=$next; next;

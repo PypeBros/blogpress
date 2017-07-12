@@ -44,7 +44,11 @@ close PIXMAP;
 
 # blogger's exported content has no 'newline'. Let's create some, one per entry, exactly.
 # (that assumes no <entry> tag appears recursively in the structure).
-open BLOG,"sed -e 's:<entry>:\\n<entry>:g;' $blogname|" or die "no $blogname file around?";
+if (exists $ENV{SIMPLE}) {
+    open BLOG, "$blogname>" or die "no $blogname file around?";
+} else {
+    open BLOG,"sed -e 's:<entry>:\\n<entry>:g;' $blogname|" or die "no $blogname file around?";
+}
 
 foreach my $key (1..$#ARGV) {
   $wanted{$ARGV[$key]}=$key;
