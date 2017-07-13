@@ -57,6 +57,16 @@ foreach my $key (1..$#ARGV) {
 %esc=(lt=>'<',gt=>'>',amp=>'&',quot=>'"',apos=>"'"
       );
 
+sub check_for_pictures {
+    my $post = shift @_;
+    while ($post =~ /src="([^"]*)" (.*)/) {
+	my $url = $1;
+	$post = $2;
+	-r "$larger{$pix{$url}}$pix{$url}" ||
+	    print STDERR "X_X $url wasn't downloaded\n"; 
+    }
+}
+
 while ($_=<BLOG>) {
   $lno++;
   $imno=1;
@@ -89,9 +99,9 @@ while ($_=<BLOG>) {
 
   $all=~ m:<content type='html'>(.*)</content>:;
   $post=$1;
-#   foreach(keys %esc){
-#     $post=~s/&$_;/$esc{$_}/g;
-#   }
+
+  check_for_pictures($post);
+  
   $post=~s/&([a-z]+);/$esc{$1}/g;
   $post=~s/src=\"([^"]+)"/src="$larger{$pix{$1}}$pix{$1}" alt="$1 ; $pix{$1}"/g;
   $post=~s/width: \d+px//g;

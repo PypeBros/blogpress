@@ -26,6 +26,12 @@ while (<>) {
     $preview=substr($next,0,40);
 #    print STDERR "0_0 $` [$url] [$preview...\n";
 
+    if ($url=~ m=(https?://i.imgur.com)/([A-Z0-9a-z]+\.[a-z]+)=) {
+	-r "$lno-$imno-$2" or
+	    print "{imgur, $lno} '$1/$2' --output-document=\"$lno-$imno-$2\"\n";
+	 $imno++; $line=$next; next;
+    }
+    
     if ($url=~ m=(https?://[a-z0-9.]+blogspot.com/[-_][0-9a-zA-Z/_-]+)/s([0-9]+)(\-?h?/)([^".]+.[a-z]+)(.*)=) {
       -r "$lno-$imno-$4" or 
 	print "{local, $2px, $lno} '$1/s$2/$4' --output-document=\"$lno-$imno-$4\"\n";
